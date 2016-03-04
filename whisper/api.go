@@ -19,6 +19,7 @@ package whisper
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -75,6 +76,35 @@ func (s *PublicWhisperAPI) NewIdentity() (string, error) {
 
 	identity := s.w.NewIdentity()
 	return common.ToHex(crypto.FromECDSAPub(&identity.PublicKey)), nil
+}
+
+
+// CreateIdentity mirrors NewIdentity, with the exception that it returns then
+// hex encoded private key, not the public key.
+func (s *PublicWhisperAPI) CreateIdentity() ([]string, error) {
+	if s.w == nil {
+		return []string{"", ""}, whisperOffLineErr
+	}
+
+	prv := s.w.NewIdentity()
+	pub := crypto.GetECDSAPub(prv)
+
+	return []string{common.ToHex(crypto.FromECDSAPub(pub)), common.ToHex(crypto.FromECDSA(prv))}, nil
+}
+
+// AddIdentity injects the identity (a hex encoded private key) into known identities.
+func (s *PublicWhisperAPI) AddIdentity(identity string) (string, error) {
+	if s.w == nil {
+		return "", whisperOffLineErr
+	}
+
+	key, err := crypto.HexToECDSA(strings.TrimPrefix(identity, "0x"))
+	if err != nil {
+		return "", err
+	}
+
+	s.w.AddIdentity(key)
+	return common.ToHex(crypto.FromECDSA(key)), nil
 }
 
 type NewFilterArgs struct {

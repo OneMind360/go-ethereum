@@ -206,6 +206,8 @@ var (
 			"post",
 			"newIdentity",
 			"hasIdentity",
+			"createIdentity",
+			"addIdentity",
 			"newGroup",
 			"addToGroup",
 			"filter",

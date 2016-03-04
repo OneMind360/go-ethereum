@@ -107,6 +107,12 @@ func FromECDSA(prv *ecdsa.PrivateKey) []byte {
 	return prv.D.Bytes()
 }
 
+func GetECDSAPub(prv *ecdsa.PrivateKey) *ecdsa.PublicKey {
+	pub := &ecdsa.PublicKey{Curve: secp256k1.S256()}
+	pub.X, pub.Y = secp256k1.S256().ScalarBaseMult(FromECDSA(prv))
+	return pub
+}
+
 func ToECDSAPub(pub []byte) *ecdsa.PublicKey {
 	if len(pub) == 0 {
 		return nil
